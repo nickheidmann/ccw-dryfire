@@ -9,6 +9,7 @@
   --amber-dark: #d97706;
   --green: #22c55e;
   --red: #ef4444;
+  --purple: #a78bfa;
   --text: #f1f5f9;
   --sub: #94a3b8;
   --border: #3f3f3f;
@@ -32,7 +33,6 @@ html, body, #root {
   padding: 0 0 80px;
 }
 
-/* HEADER */
 header {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d1a00 100%);
   border-bottom: 2px solid var(--amber);
@@ -48,327 +48,156 @@ header h1 {
   line-height: 1.2;
   text-align: center;
 }
-header h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--amber);
-}
-header p.sub, header .sub {
-  font-size: 0.78rem;
-  color: var(--sub);
-  margin-top: 2px;
-}
+header h2 { font-size: 1.15rem; font-weight: 700; color: var(--amber); }
+header p.sub, header .sub { font-size: 0.78rem; color: var(--sub); margin-top: 2px; }
 .back-btn {
-  background: none;
-  border: none;
-  color: var(--amber);
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 2px 0 6px;
-  display: block;
+  background: none; border: none; color: var(--amber);
+  font-size: 0.9rem; cursor: pointer; padding: 2px 0 6px; display: block;
 }
 
-/* PROGRESS CARD */
 .progress-card {
-  margin: 16px;
-  background: var(--surface);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  padding: 16px;
+  margin: 16px; background: var(--surface);
+  border-radius: 12px; border: 1px solid var(--border); padding: 16px;
 }
 .prog-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px; font-size: 0.9rem;
 }
-.pct {
-  font-weight: 700;
-  color: var(--amber);
-  font-size: 1.1rem;
-}
+.pct { font-weight: 700; color: var(--amber); font-size: 1.1rem; }
 .bar-bg {
-  background: var(--surface2);
-  border-radius: 6px;
-  height: 10px;
-  overflow: hidden;
-  margin-bottom: 8px;
+  background: var(--surface2); border-radius: 6px;
+  height: 10px; overflow: hidden; margin-bottom: 8px;
 }
 .bar-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--amber-dark), var(--amber));
-  border-radius: 6px;
-  transition: width 0.5s ease;
+  border-radius: 6px; transition: width 0.5s ease;
 }
-.prog-note {
-  font-size: 0.82rem;
-  color: var(--sub);
-}
+.prog-note { font-size: 0.82rem; color: var(--sub); }
 
-/* BUTTONS */
-.btn-group {
-  display: flex;
-  gap: 10px;
-  margin: 0 16px 12px;
-}
+.btn-group { display: flex; gap: 10px; margin: 0 16px 12px; }
 .btn-primary, .btn-secondary, .btn-finish, .btn-start-big {
-  border: none;
-  border-radius: 10px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 12px 16px;
-  transition: opacity 0.15s;
+  border: none; border-radius: 10px; font-size: 0.95rem;
+  font-weight: 600; cursor: pointer; padding: 12px 16px; transition: opacity 0.15s;
 }
-.btn-primary:active, .btn-secondary:active, .btn-finish:active, .btn-start-big:active {
-  opacity: 0.75;
-}
-.btn-primary {
-  background: var(--amber);
-  color: #1a1a1a;
-  flex: 1;
-}
-.btn-secondary {
-  background: var(--surface2);
-  color: var(--text);
-  flex: 1;
-  border: 1px solid var(--border);
-}
-.btn-finish {
-  background: var(--green);
-  color: #fff;
-  flex: 1;
-}
+.btn-primary:active, .btn-secondary:active, .btn-finish:active, .btn-start-big:active { opacity: 0.75; }
+.btn-primary { background: var(--amber); color: #1a1a1a; flex: 1; }
+.btn-secondary { background: var(--surface2); color: var(--text); flex: 1; border: 1px solid var(--border); }
+.btn-finish { background: var(--green); color: #fff; flex: 1; }
 .btn-start-big {
   background: linear-gradient(135deg, var(--amber-dark), var(--amber));
-  color: #1a1a1a;
-  margin: 4px 16px;
-  width: calc(100% - 32px);
-  font-size: 1.1rem;
-  padding: 16px;
-  border-radius: 12px;
-  letter-spacing: 0.5px;
+  color: #1a1a1a; margin: 4px 16px; width: calc(100% - 32px);
+  font-size: 1.1rem; padding: 16px; border-radius: 12px; letter-spacing: 0.5px;
   box-shadow: 0 4px 14px rgba(245,158,11,0.35);
 }
 .btn-tips {
-  background: var(--surface2);
-  border: 1px solid var(--amber);
-  color: var(--amber);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 8px;
+  background: var(--surface2); border: 1px solid var(--amber);
+  color: var(--amber); border-radius: 8px; padding: 10px 14px;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 8px;
 }
 
-/* WEEK BLOCK */
-.week-block {
-  margin: 12px 16px 0;
-}
+.week-block { margin: 12px 16px 0; }
 .week-label {
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--amber);
-  padding: 6px 0 4px;
-  text-transform: uppercase;
-  border-top: 1px solid var(--border);
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; color: var(--amber);
+  padding: 6px 0 4px; text-transform: uppercase; border-top: 1px solid var(--border);
 }
 .session-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface);
-  border-radius: 8px;
-  padding: 12px;
-  margin: 6px 0;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  transition: border-color 0.15s;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border-radius: 8px; padding: 12px; margin: 6px 0;
+  cursor: pointer; border: 1px solid var(--border); transition: border-color 0.15s;
 }
 .session-row:active { border-color: var(--amber); }
 .session-row.done { opacity: 0.6; }
-.srow-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.srow-left { display: flex; align-items: center; gap: 10px; }
 .srow-check { font-size: 1.1rem; }
 .srow-title { font-size: 0.9rem; font-weight: 600; }
 .srow-sub { font-size: 0.75rem; color: var(--sub); margin-top: 2px; }
 .srow-arrow { color: var(--sub); font-size: 1.2rem; }
 
-/* DRILL CARD */
 .drill-card {
-  margin: 12px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  margin: 12px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; padding: 16px;
 }
-.drill-header {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
+.drill-header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
 .drill-icon { font-size: 2.2rem; }
 .drill-icon-sm { font-size: 1.5rem; min-width: 32px; text-align: center; }
 .drill-name { font-size: 1.05rem; font-weight: 700; }
 .drill-short { font-size: 0.8rem; color: var(--sub); margin-top: 2px; }
 .drill-badge {
-  display: inline-block;
-  background: var(--amber-dark);
-  color: #1a1a1a;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  border-radius: 4px;
-  padding: 2px 6px;
-  margin-top: 4px;
+  display: inline-block; background: var(--amber-dark); color: #1a1a1a;
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 1px;
+  border-radius: 4px; padding: 2px 6px; margin-top: 4px;
 }
 
-/* DRILL LIBRARY ROW */
 .drill-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--surface);
-  border-radius: 8px;
-  padding: 14px 12px;
-  margin: 6px 16px;
-  cursor: pointer;
-  border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; background: var(--surface);
+  border-radius: 8px; padding: 14px 12px; margin: 6px 16px;
+  cursor: pointer; border: 1px solid var(--border);
 }
 .drill-row:active { border-color: var(--amber); }
 .drill-row-name { font-size: 0.95rem; font-weight: 600; }
 .drill-row-sub { font-size: 0.75rem; color: var(--sub); margin-top: 2px; }
 
-/* SESSION NAV */
-.session-nav {
-  display: flex;
-  gap: 10px;
-  margin: 12px 16px;
-}
+.session-nav { display: flex; gap: 10px; margin: 12px 16px; }
 
 /* PAR TIMER */
 .par-timer {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px;
-  margin: 8px 0 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; margin: 8px 0 6px;
 }
 .par-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.8rem;
-  color: var(--sub);
-  margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.8rem; color: var(--sub); margin-bottom: 8px;
 }
-.par-rep-count {
-  font-weight: 700;
-  color: var(--amber);
-}
+.par-rep-count { font-weight: 700; color: var(--amber); }
 .par-bar-bg {
-  background: #1a1a1a;
-  border-radius: 6px;
-  height: 12px;
-  overflow: hidden;
-  margin-bottom: 6px;
+  background: #1a1a1a; border-radius: 6px; height: 12px; overflow: hidden; margin-bottom: 6px;
 }
-.par-bar-fill {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.08s linear, background 0.3s;
-}
+.par-bar-fill { height: 100%; border-radius: 6px; transition: width 0.08s linear, background 0.3s; }
 .par-time-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-  color: var(--sub);
-  margin-bottom: 8px;
+  display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--sub); margin-bottom: 8px;
 }
 .par-elapsed { font-weight: 700; color: var(--text); font-size: 1rem; }
 .par-goal { color: var(--sub); }
-.par-done {
-  text-align: center;
-  color: var(--green);
-  font-weight: 600;
-  font-size: 0.85rem;
-  margin-bottom: 6px;
-}
+.par-done { text-align: center; color: var(--green); font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; }
 .par-btns { display: flex; gap: 8px; }
 .btn-par-start {
-  flex: 1;
-  background: var(--amber);
-  color: #1a1a1a;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
+  flex: 1; background: var(--amber); color: #1a1a1a;
+  border: none; border-radius: 8px; padding: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
 }
 .btn-par-stop {
-  flex: 1;
-  background: var(--red);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
+  flex: 1; background: var(--red); color: #fff;
+  border: none; border-radius: 8px; padding: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
 }
 .btn-par-start:active, .btn-par-stop:active { opacity: 0.8; }
 
+/* REST BETWEEN REPS */
+.par-rest-box { padding: 4px 0 6px; }
+.par-rest-label {
+  font-size: 0.82rem; color: var(--purple); font-weight: 600;
+  margin-bottom: 6px; text-align: center; letter-spacing: 0.3px;
+}
+.par-rest-countdown {
+  text-align: center; font-size: 1.6rem; font-weight: 800;
+  color: var(--purple); margin-top: 4px; line-height: 1;
+}
+
 /* TIPS */
 .tips-card {
-  margin: 12px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
+  margin: 12px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
 }
-.tip-meta {
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  color: var(--sub);
-  border-bottom: 1px solid var(--border);
-}
+.tip-meta { padding: 10px 14px; font-size: 0.82rem; color: var(--sub); border-bottom: 1px solid var(--border); }
 .tip-meta b { color: var(--amber); }
 .tip-item {
-  display: flex;
-  gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.15s;
+  display: flex; gap: 10px; padding: 12px 14px;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
 }
 .tip-item:last-child { border-bottom: none; }
 .tip-item:active, .tip-item.expanded { background: var(--surface2); }
 .tip-num {
-  min-width: 22px;
-  height: 22px;
-  background: var(--amber-dark);
-  color: #1a1a1a;
-  border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1px;
-  flex-shrink: 0;
+  min-width: 22px; height: 22px; background: var(--amber-dark); color: #1a1a1a;
+  border-radius: 50%; font-size: 0.75rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px; flex-shrink: 0;
 }
 .tip-text { font-size: 0.87rem; line-height: 1.5; color: var(--text); }
-
-/* PAR timer inside tips view */
-.tips-card + .par-timer {
-  margin: 0 16px;
-}
