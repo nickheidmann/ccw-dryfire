@@ -1,12 +1,130 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
-  <rect width="100" height="100" rx="20" fill="#1a1a1a"/>
-  <!-- Crosshair circle -->
-  <circle cx="50" cy="50" r="28" stroke="#f59e0b" stroke-width="3.5" fill="none"/>
-  <!-- Crosshair lines -->
-  <line x1="50" y1="14" x2="50" y2="28" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-  <line x1="50" y1="72" x2="50" y2="86" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-  <line x1="14" y1="50" x2="28" y2="50" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-  <line x1="72" y1="50" x2="86" y2="50" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
-  <!-- Center dot -->
-  <circle cx="50" cy="50" r="4" fill="#f59e0b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#1a1a1a"/>
+  
+  <!-- Ground / dust -->
+  <ellipse cx="256" cy="420" rx="180" ry="18" fill="#3d2b1f" opacity="0.7"/>
+  
+  <!-- HORSE BODY -->
+  <!-- Main body -->
+  <ellipse cx="230" cy="340" rx="110" ry="62" fill="#8B6914" transform="rotate(-8,230,340)"/>
+  <!-- Horse neck -->
+  <ellipse cx="300" cy="278" rx="32" ry="52" fill="#8B6914" transform="rotate(20,300,278)"/>
+  <!-- Horse head -->
+  <ellipse cx="345" cy="238" rx="24" ry="36" fill="#8B6914" transform="rotate(30,345,238)"/>
+  <!-- Horse nose/muzzle -->
+  <ellipse cx="362" cy="218" rx="14" ry="10" fill="#7a5a10" transform="rotate(30,362,218)"/>
+  <!-- Horse eye -->
+  <circle cx="350" cy="228" r="5" fill="#1a1a1a"/>
+  <circle cx="351" cy="227" r="2" fill="#fff"/>
+  <!-- Horse nostril -->
+  <ellipse cx="368" cy="213" rx="4" ry="3" fill="#5a3a00" transform="rotate(30,368,213)"/>
+  <!-- Horse ear -->
+  <polygon points="332,210 322,195 340,198" fill="#8B6914"/>
+  <polygon points="332,210 324,198 336,200" fill="#c49a2a"/>
+  <!-- Horse mane -->
+  <path d="M295,265 Q285,255 290,240 Q300,230 310,245 Q298,258 300,270" fill="#5a3000"/>
+  <path d="M305,268 Q292,260 295,244 Q308,232 316,248 Q305,262 308,272" fill="#6b3800"/>
+  
+  <!-- Horse legs - front -->
+  <rect x="296" y="370" width="18" height="70" rx="6" fill="#7a5a10" transform="rotate(5,296,370)"/>
+  <rect x="320" y="372" width="18" height="68" rx="6" fill="#7a5a10" transform="rotate(-3,320,372)"/>
+  <!-- Horse hooves front -->
+  <rect x="294" y="432" width="22" height="14" rx="4" fill="#2a1a00" transform="rotate(5,294,432)"/>
+  <rect x="318" y="431" width="22" height="14" rx="4" fill="#2a1a00" transform="rotate(-3,318,431)"/>
+  
+  <!-- Horse legs - back -->
+  <rect x="148" y="372" width="18" height="70" rx="6" fill="#7a5a10" transform="rotate(-5,148,372)"/>
+  <rect x="174" y="368" width="18" height="72" rx="6" fill="#7a5a10" transform="rotate(3,174,368)"/>
+  <!-- Horse hooves back -->
+  <rect x="144" y="432" width="22" height="14" rx="4" fill="#2a1a00" transform="rotate(-5,144,432)"/>
+  <rect x="171" y="431" width="22" height="14" rx="4" fill="#2a1a00" transform="rotate(3,171,431)"/>
+  
+  <!-- Horse tail -->
+  <path d="M130,340 Q95,350 80,380 Q90,385 100,370 Q110,395 125,398 Q128,380 140,368 Q145,355 140,340Z" fill="#5a3000"/>
+  <path d="M130,340 Q88,360 78,390" stroke="#6b3800" stroke-width="4" fill="none"/>
+  <path d="M130,342 Q92,368 85,400" stroke="#6b3800" stroke-width="3" fill="none"/>
+  
+  <!-- SADDLE -->
+  <ellipse cx="225" cy="290" rx="70" ry="22" fill="#5a2d00" transform="rotate(-8,225,290)"/>
+  <ellipse cx="225" cy="288" rx="65" ry="18" fill="#6b3800" transform="rotate(-8,225,288)"/>
+  <!-- Saddle horn -->
+  <ellipse cx="275" cy="276" rx="10" ry="7" fill="#4a1e00"/>
+  <ellipse cx="275" cy="272" rx="7" ry="5" fill="#5a2d00"/>
+  
+  <!-- COWGIRL BODY -->
+  <!-- Jeans/legs -->
+  <rect x="218" y="278" width="22" height="50" rx="6" fill="#2255aa" transform="rotate(8,218,278)"/>
+  <rect x="240" y="275" width="22" height="52" rx="6" fill="#2255aa" transform="rotate(-5,240,275)"/>
+  <!-- Boots -->
+  <rect x="214" y="316" width="26" height="18" rx="5" fill="#4a2800" transform="rotate(8,214,316)"/>
+  <rect x="237" y="316" width="26" height="18" rx="5" fill="#4a2800" transform="rotate(-5,237,316)"/>
+  
+  <!-- Shirt / torso -->
+  <rect x="210" y="215" width="68" height="72" rx="10" fill="#cc3333" transform="rotate(-3,210,215)"/>
+  <!-- Belt -->
+  <rect x="210" y="278" width="68" height="12" rx="3" fill="#4a2800" transform="rotate(-3,210,278)"/>
+  <rect x="238" y="279" width="14" height="10" rx="2" fill="#c49a2a"/>
+  
+  <!-- COWGIRL LEFT ARM (holding reins, down) -->
+  <rect x="195" y="228" width="18" height="50" rx="7" fill="#cc3333" transform="rotate(15,195,228)"/>
+  <!-- Left hand -->
+  <ellipse cx="194" cy="275" rx="9" ry="8" fill="#e8c090" transform="rotate(15,194,275)"/>
+  <!-- Reins -->
+  <path d="M194,275 Q240,295 295,270 Q310,262 318,250" stroke="#4a2800" stroke-width="3" fill="none"/>
+  
+  <!-- COWGIRL RIGHT ARM (extended, shooting pistol) -->
+  <rect x="272" y="198" width="18" height="52" rx="7" fill="#cc3333" transform="rotate(-45,272,198)"/>
+  <!-- Right hand -->
+  <ellipse cx="310" cy="170" rx="9" ry="8" fill="#e8c090" transform="rotate(-45,310,170)"/>
+  
+  <!-- PISTOL -->
+  <!-- Barrel -->
+  <rect x="318" y="158" width="48" height="10" rx="3" fill="#555" transform="rotate(-10,318,158)"/>
+  <!-- Frame -->
+  <rect x="310" y="158" width="28" height="18" rx="3" fill="#444" transform="rotate(-10,310,158)"/>
+  <!-- Grip -->
+  <rect x="314" y="172" width="16" height="22" rx="3" fill="#333" transform="rotate(-10,314,172)"/>
+  <!-- Trigger guard -->
+  <path d="M314,172 Q320,185 328,172" stroke="#555" stroke-width="3" fill="none" transform="rotate(-10,314,172)"/>
+  <!-- Muzzle flash! -->
+  <polygon points="370,148 382,143 378,155 390,150 376,160 380,172 368,165 362,177 358,164 345,168 355,158 342,150 358,152" 
+    fill="#f59e0b" transform="rotate(-10,366,160)"/>
+  <polygon points="370,148 382,143 378,155 390,150 376,160 380,172 368,165 362,177 358,164 345,168 355,158 342,150 358,152" 
+    fill="#ff6600" transform="rotate(-10,366,160) scale(0.7)" style="transform-origin:366px 160px"/>
+  
+  <!-- COWGIRL HEAD -->
+  <!-- Neck -->
+  <rect x="236" y="200" width="18" height="22" rx="5" fill="#e8c090"/>
+  <!-- Face -->
+  <ellipse cx="245" cy="192" rx="28" ry="30" fill="#e8c090"/>
+  <!-- Hair -->
+  <ellipse cx="245" cy="175" rx="30" ry="20" fill="#8B4513"/>
+  <path d="M218,182 Q205,210 210,235" stroke="#8B4513" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M272,182 Q280,200 275,220" stroke="#8B4513" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <ellipse cx="236" cy="192" rx="5" ry="5.5" fill="#1a1a1a"/>
+  <ellipse cx="254" cy="192" rx="5" ry="5.5" fill="#1a1a1a"/>
+  <circle cx="238" cy="191" r="2" fill="#fff"/>
+  <circle cx="256" cy="191" r="2" fill="#fff"/>
+  <!-- Determined expression -->
+  <path d="M238,204 Q245,209 253,204" stroke="#c07850" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Eyebrows (focused/intense) -->
+  <path d="M231,186 Q236,183 241,185" stroke="#5a2d00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M249,185 Q254,183 259,185" stroke="#5a2d00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- COWGIRL HAT -->
+  <!-- Brim -->
+  <ellipse cx="245" cy="168" rx="42" ry="10" fill="#8B4513"/>
+  <!-- Crown -->
+  <rect x="215" y="130" width="60" height="42" rx="12" fill="#8B4513"/>
+  <!-- Hat band -->
+  <rect x="215" y="158" width="60" height="10" rx="3" fill="#c49a2a"/>
+  <!-- Hat dent -->
+  <path d="M215,145 Q245,138 275,145" stroke="#6b3000" stroke-width="3" fill="none"/>
+  <!-- Hat star/badge -->
+  <polygon points="245,136 248,144 256,144 250,149 252,157 245,153 238,157 240,149 234,144 242,144" fill="#f59e0b"/>
+  
+  <!-- Amber title text accent -->
+  <text x="256" y="490" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#f59e0b" opacity="0.9">CCW TRAINING</text>
 </svg>
