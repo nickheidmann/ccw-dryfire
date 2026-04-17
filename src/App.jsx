@@ -1,424 +1,463 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
+// ─── PAR TIMER HELPERS ───────────────────────────────────────────────────────
+function beep(ctx, freq = 880, dur = 0.15, vol = 0.6, delay = 0) {
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+  osc.frequency.value = freq
+  gain.gain.setValueAtTime(0, ctx.currentTime + delay)
+  gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01)
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + dur)
+  osc.start(ctx.currentTime + delay)
+  osc.stop(ctx.currentTime + delay + dur + 0.05)
+}
+function startBeep(ctx) { beep(ctx, 880, 0.12, 0.5) }
+function stopBeep(ctx) {
+  beep(ctx, 660, 0.12, 0.5)
+  beep(ctx, 880, 0.18, 0.7, 0.15)
+}
+
+// ─── DRILL DEFINITIONS ───────────────────────────────────────────────────────
 const DRILLS = [
-  { id: 'draw', name: 'Draw & Dry Fire', desc: 'Full draw from holster to first shot', reps: 10 },
-  { id: 'sight', name: 'Sight Alignment', desc: 'Focus on front sight, trigger press', reps: 15 },
-  { id: 'trigger', name: 'Trigger Control', desc: 'Slow press without disturbing sights', reps: 20 },
-  { id: 'reload', name: 'Emergency Reload', desc: 'Drop mag, insert fresh mag, rack', reps: 5 },
-  { id: 'malfunction', name: 'Malfunction Clear', desc: 'Tap, rack, assess', reps: 5 },
-  { id: 'retention', name: 'Retention Position', desc: 'Close-quarters retention shooting', reps: 10 },
-  { id: 'scan', name: 'Scan & Assess', desc: 'Post-shot scan, reholster safely', reps: 10 },
+  {
+    id: 'draw',
+    name: 'Draw & Dry Fire',
+    icon: '🔫',
+    par: 1.5,
+    reps: 5,
+    short: 'Full draw to first shot',
+    principles: 'TARGET FOCUS',
+    tips: [
+      'Ben Stoeger: Your grip is set in the holster — lock your firing hand high on the backstrap before the gun moves.',
+      'Joel Park: Drive your eyes to the target first. Your hands follow your eyes, not the other way around.',
+      'As the muzzle rises into your line of sight the front sight will be blurry — that is correct. Press the trigger while looking through the sights at the target.',
+      'Strive for a consistent "four-count" draw: grip → clear → rotate → extend. Each count should be equally fast.',
+      'Par goal: full draw and press in under 1.5 s from concealment.',
+    ],
+  },
+  {
+    id: 'sight',
+    name: 'Sight Picture & Index',
+    icon: '🎯',
+    par: 2.0,
+    reps: 10,
+    short: 'Target-focus index drill',
+    principles: 'TARGET FOCUS',
+    tips: [
+      'Joel Park: Hard-focus on the target. The front sight will drift into your peripheral soft-focus — trust it.',
+      'Ben Stoeger: Acceptable sight picture = front sight roughly centered, at approximately the right height. Do not chase perfection; press the trigger.',
+      'Practice calling your shot: before the gun moves, mentally commit to where the bullet will land based on your sight picture.',
+      'Dry-fire is perfect for building the neural pathway of "see target → index sights → press." Repeat 10×.',
+      'If you catch yourself focusing on the front sight exclusively, intentionally look harder at a specific spot on the target.',
+    ],
+  },
+  {
+    id: 'trigger',
+    name: 'Trigger Control',
+    icon: '☝️',
+    par: 3.0,
+    reps: 15,
+    short: 'Press without disturbing sights',
+    principles: 'TRIGGER RESET',
+    tips: [
+      'Ben Stoeger: Trigger control is about SPEED, not about being gentle. Press fast enough that the gun does not have time to move.',
+      'Joel Park: The trigger finger should move straight back — no side-to-side fishing. If the gun dips you are anticipating.',
+      'After each press, ride the trigger forward only until you feel the reset click. Do not slap it forward.',
+      'Diagnose flinch in dry-fire: balance a coin on the front sight. If it falls during the press, you are anticipating recoil.',
+      'Goal: 15 clean presses where the sights (or a laser) never move off a 1" dot at 10 feet.',
+    ],
+  },
+  {
+    id: 'reload',
+    name: 'Emergency Reload',
+    icon: '🔄',
+    par: 3.0,
+    reps: 5,
+    short: 'Drop mag, insert fresh, rack',
+    principles: 'ECONOMY OF MOTION',
+    tips: [
+      'Ben Stoeger: The reload starts with the eyes — look to your spare mag as soon as you decide to reload, not after the empty drops.',
+      'Joel Park: Your support hand should be traveling to the mag pouch as the firing hand hits the mag release. Overlap the motions.',
+      'Practice the "gravity assist": tilt the pistol slightly toward the support hand — gravity helps seat the magazine.',
+      'Keep your eyes on the threat/target during the reload, glancing only briefly to acquire the magazine.',
+      'Par goal: emergency reload (slide locked back) completed and on target in under 3 s.',
+    ],
+  },
+  {
+    id: 'malfunction',
+    name: 'Malfunction Clear',
+    icon: '⚠️',
+    par: 4.0,
+    reps: 5,
+    short: 'Tap–rack–reassess',
+    principles: 'GROSS MOTOR',
+    tips: [
+      'Ben Stoeger: Tap-Rack-Bang is a gross-motor emergency fix. Hit the baseplate hard enough to seat the mag, rack decisively.',
+      'Joel Park: When the gun goes click, your default response should be automatic — Tap, Rack, Reassess. Build the reflex.',
+      'Type 1 (failure to fire): Tap-Rack. Type 2 (stovepipe): swipe with support hand or rack. Type 3 (double-feed): strip mag, rack twice, reload.',
+      'Dry-fire Type 1 daily: lock slide back, insert empty mag, release — then practice Tap-Rack from a high compressed ready position.',
+      'Always end the drill with eyes on the target assessing the threat — do not stare at the gun.',
+    ],
+  },
+  {
+    id: 'retention',
+    name: 'Retention Position',
+    icon: '💪',
+    par: 2.0,
+    reps: 8,
+    short: 'Close-quarters index shooting',
+    principles: 'BODY INDEX',
+    tips: [
+      'Joel Park: In a retention/contact position, the gun is indexed to your body — elbow tucked, muzzle forward of your body, wrist locked.',
+      'Ben Stoeger: You do not need the sights at arm's reach. Train your index so the gun points where your body faces.',
+      'Practice a smooth extension from retention to a full two-hand grip at eye level — a common real-world sequence.',
+      'Keep your support hand pulled tight against your chest to avoid muzzle/hand crossing (critical with live ammo).',
+      'Vary distance in your mental picture: 1 foot (contact), 3 feet (close quarters), 5 feet (near retention). Different body mechanics at each.',
+    ],
+  },
+  {
+    id: 'scan',
+    name: 'Scan & Assess',
+    icon: '👁️',
+    par: 5.0,
+    reps: 6,
+    short: 'Post-shot scan, reholster safely',
+    principles: 'SITUATIONAL AWARENESS',
+    tips: [
+      'Joel Park: After every drill, build the habit: scan left, scan right, look over your shoulder. Make it real — move your head.',
+      'Ben Stoeger: The threat may have friends. Your scan is not a formality — you are genuinely looking for additional threats.',
+      'After scanning, safely decock or apply safety (as applicable) before reholstering. Never rush the holster.',
+      'Practice a one-second "mental reset" after the scan: breathe out, identify that the threat is down, then reholster with eyes up.',
+      'Dry-fire full sequence: draw → press → follow-through → scan left/right → reholster. This trains the complete defensive sequence.',
+    ],
+  },
 ]
 
-const STORAGE_KEY = 'ccw-dryfire-v1'
+// ─── 4-WEEK PROGRAM ──────────────────────────────────────────────────────────
+// 5 days/week × 4 weeks = 20 sessions × ~10 min each
+// Format: { week, day, label, drillIds[], focus, duration }
+const PROGRAM = [
+  // WEEK 1 — Foundation
+  { week:1, day:1, label:'W1D1', focus:'Draw Fundamentals', duration:10, drillIds:['draw','trigger','scan'] },
+  { week:1, day:2, label:'W1D2', focus:'Sight & Trigger', duration:10, drillIds:['sight','trigger','scan'] },
+  { week:1, day:3, label:'W1D3', focus:'Draw & Index', duration:10, drillIds:['draw','sight','scan'] },
+  { week:1, day:4, label:'W1D4', focus:'Reload Intro', duration:10, drillIds:['reload','trigger','scan'] },
+  { week:1, day:5, label:'W1D5', focus:'Full Sequence', duration:10, drillIds:['draw','trigger','reload','scan'] },
+  // WEEK 2 — Consistency
+  { week:2, day:1, label:'W2D1', focus:'Speed Draw', duration:10, drillIds:['draw','draw','trigger','scan'] },
+  { week:2, day:2, label:'W2D2', focus:'Trigger Mastery', duration:10, drillIds:['trigger','trigger','sight','scan'] },
+  { week:2, day:3, label:'W2D3', focus:'Reload Speed', duration:10, drillIds:['reload','reload','draw','scan'] },
+  { week:2, day:4, label:'W2D4', focus:'Malfunctions', duration:10, drillIds:['malfunction','malfunction','trigger','scan'] },
+  { week:2, day:5, label:'W2D5', focus:'Full Sequence', duration:10, drillIds:['draw','trigger','reload','malfunction','scan'] },
+  // WEEK 3 — Stress & Close Quarters
+  { week:3, day:1, label:'W3D1', focus:'Retention & Draw', duration:10, drillIds:['retention','draw','scan'] },
+  { week:3, day:2, label:'W3D2', focus:'Trigger Under Stress', duration:10, drillIds:['trigger','retention','sight','scan'] },
+  { week:3, day:3, label:'W3D3', focus:'Reload & Retention', duration:10, drillIds:['reload','retention','malfunction','scan'] },
+  { week:3, day:4, label:'W3D4', focus:'Malfunction Drill', duration:10, drillIds:['malfunction','malfunction','reload','scan'] },
+  { week:3, day:5, label:'W3D5', focus:'Full Defensive Sequence', duration:10, drillIds:['draw','retention','trigger','reload','malfunction','scan'] },
+  // WEEK 4 — Performance
+  { week:4, day:1, label:'W4D1', focus:'Par Challenge: Draw', duration:10, drillIds:['draw','draw','draw','scan'] },
+  { week:4, day:2, label:'W4D2', focus:'Par Challenge: Trigger', duration:10, drillIds:['trigger','trigger','trigger','scan'] },
+  { week:4, day:3, label:'W4D3', focus:'Par Challenge: Reload', duration:10, drillIds:['reload','reload','reload','scan'] },
+  { week:4, day:4, label:'W4D4', focus:'Complete Skills Check', duration:10, drillIds:['draw','sight','trigger','reload','malfunction','retention','scan'] },
+  { week:4, day:5, label:'W4D5', focus:'Graduation Day', duration:10, drillIds:['draw','sight','trigger','reload','malfunction','retention','scan'] },
+]
+
+const STORAGE_KEY = 'hollie-ccw-v2'
 
 function loadData() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-  } catch {
-    return {}
-  }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }
+  catch { return {} }
+}
+function saveData(d) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)) } catch {}
 }
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-}
-
-function todayKey() {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function getStreak(data) {
-  let streak = 0
-  const d = new Date()
-  while (true) {
-    const key = d.toISOString().slice(0, 10)
-    if (!data[key] || !data[key].completed) break
-    streak++
-    d.setDate(d.getDate() - 1)
-  }
-  return streak
-}
-
+// ─── APP ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [data, setData] = useState(loadData)
-  const [tab, setTab] = useState('today')
-  const [activeDrill, setActiveDrill] = useState(null)
-  const [repsLeft, setRepsLeft] = useState(0)
-  const [notes, setNotes] = useState('')
+  const [view, setView] = useState('home') // home | program | session | drill | tips
+  const [selectedSession, setSelectedSession] = useState(null)
+  const [sessionDrillIdx, setSessionDrillIdx] = useState(0)
+  const [selectedDrill, setSelectedDrill] = useState(null)
+  const [expandedTip, setExpandedTip] = useState(null)
+  // Par timer state
+  const [parRunning, setParRunning] = useState(false)
+  const [parElapsed, setParElapsed] = useState(0)
+  const [parRepCount, setParRepCount] = useState(0)
+  const audioCtxRef = useRef(null)
+  const parIntervalRef = useRef(null)
+  const parRepRef = useRef(0)
+  const parElapsedRef = useRef(0)
 
-  const today = todayKey()
-  const todayData = data[today] || { drills: {}, completed: false, notes: '' }
+  function getAudioCtx() {
+    if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)()
+    }
+    if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume()
+    return audioCtxRef.current
+  }
 
-  useEffect(() => {
-    saveData(data)
-  }, [data])
+  const startPar = useCallback((drill) => {
+    const ctx = getAudioCtx()
+    const par = drill.par
+    const reps = drill.reps
+    parRepRef.current = 0
+    parElapsedRef.current = 0
+    setParRepCount(0)
+    setParElapsed(0)
+    setParRunning(true)
+    startBeep(ctx)
 
-  const startDrill = useCallback((drill) => {
-    setActiveDrill(drill)
-    setRepsLeft(drill.reps)
+    parIntervalRef.current = setInterval(() => {
+      parElapsedRef.current += 0.1
+      setParElapsed(+(parElapsedRef.current.toFixed(1)))
+      if (parElapsedRef.current >= par) {
+        parElapsedRef.current = 0
+        setParElapsed(0)
+        const ctx2 = getAudioCtx()
+        parRepRef.current += 1
+        setParRepCount(parRepRef.current)
+        if (parRepRef.current >= reps) {
+          clearInterval(parIntervalRef.current)
+          setParRunning(false)
+          stopBeep(ctx2)
+        } else {
+          stopBeep(ctx2)
+          setTimeout(() => {
+            const ctx3 = getAudioCtx()
+            startBeep(ctx3)
+          }, 800)
+        }
+      }
+    }, 100)
   }, [])
 
-  const logRep = useCallback(() => {
-    if (repsLeft <= 1) {
-      // Mark drill complete
-      setData(prev => {
-        const updated = { ...prev }
-        const day = updated[today] || { drills: {}, completed: false, notes: '' }
-        day.drills = { ...day.drills, [activeDrill.id]: true }
-        const allDone = DRILLS.every(d => day.drills[d.id])
-        day.completed = allDone
-        updated[today] = day
-        return updated
-      })
-      setActiveDrill(null)
-      setRepsLeft(0)
-    } else {
-      setRepsLeft(r => r - 1)
-    }
-  }, [repsLeft, activeDrill, today])
+  const stopPar = useCallback(() => {
+    clearInterval(parIntervalRef.current)
+    setParRunning(false)
+    setParElapsed(0)
+    setParRepCount(0)
+    parRepRef.current = 0
+    parElapsedRef.current = 0
+  }, [])
 
-  const saveNotes = useCallback(() => {
-    setData(prev => {
-      const updated = { ...prev }
-      const day = updated[today] || { drills: {}, completed: false, notes: '' }
-      day.notes = notes
-      updated[today] = day
-      return updated
-    })
-  }, [notes, today])
+  useEffect(() => () => clearInterval(parIntervalRef.current), [])
 
-  const streak = getStreak(data)
-  const completedToday = DRILLS.filter(d => todayData.drills?.[d.id]).length
+  const persist = (next) => { setData(next); saveData(next) }
 
-  if (activeDrill) {
+  // Progress helpers
+  const sessionKey = (s) => s.label
+  const isDone = (s) => !!data[sessionKey(s)]
+  const totalDone = PROGRAM.filter(isDone).length
+  const pct = Math.round((totalDone / PROGRAM.length) * 100)
+
+  const nextSession = PROGRAM.find(s => !isDone(s)) || PROGRAM[PROGRAM.length - 1]
+
+  function markSessionDone(s) {
+    persist({ ...data, [sessionKey(s)]: { ts: Date.now() } })
+  }
+
+  // ── VIEW: HOME ────────────────────────────────────────────────────────────
+  if (view === 'home') return (
+    <div className="app">
+      <header>
+        <h1>🤠 Hotbabe Hollie's<br/>CCW Training App</h1>
+        <p className="sub">Target-Focus · 4 Weeks · 10 Min/Day</p>
+      </header>
+
+      <div className="progress-card">
+        <div className="prog-row">
+          <span>{totalDone} / {PROGRAM.length} sessions</span>
+          <span className="pct">{pct}%</span>
+        </div>
+        <div className="bar-bg"><div className="bar-fill" style={{width: pct+'%'}} /></div>
+        <p className="prog-note">
+          {totalDone === 0 ? 'Ready to start? Let's go!' :
+           totalDone === PROGRAM.length ? '🏆 4-Week Program Complete!' :
+           'Next: ' + nextSession.label + ' — ' + nextSession.focus}
+        </p>
+      </div>
+
+      <div className="btn-group">
+        <button className="btn-primary" onClick={() => setView('program')}>📅 4-Week Program</button>
+        <button className="btn-secondary" onClick={() => setView('drill')}>🔫 Drill Library</button>
+      </div>
+
+      {totalDone < PROGRAM.length && (
+        <button className="btn-start-big" onClick={() => { setSelectedSession(nextSession); setSessionDrillIdx(0); setView('session') }}>
+          ▶ Start {nextSession.label}
+        </button>
+      )}
+    </div>
+  )
+
+  // ── VIEW: PROGRAM ─────────────────────────────────────────────────────────
+  if (view === 'program') {
+    const weeks = [1,2,3,4]
     return (
-      <div style={styles.screen}>
-        <div style={styles.drillActive}>
-          <div style={styles.drillName}>{activeDrill.name}</div>
-          <div style={styles.drillDesc}>{activeDrill.desc}</div>
-          <div style={styles.repCount}>{repsLeft}</div>
-          <div style={styles.repLabel}>reps remaining</div>
-          <button style={styles.repBtn} onClick={logRep}>
-            {repsLeft === 1 ? 'COMPLETE' : 'REP DONE'}
-          </button>
-          <button style={styles.cancelBtn} onClick={() => setActiveDrill(null)}>
-            Cancel
-          </button>
+      <div className="app">
+        <header>
+          <button className="back-btn" onClick={() => setView('home')}>← Back</button>
+          <h2>📅 4-Week Program</h2>
+        </header>
+        {weeks.map(w => (
+          <div key={w} className="week-block">
+            <div className="week-label">WEEK {w}</div>
+            {PROGRAM.filter(s => s.week === w).map(s => {
+              const done = isDone(s)
+              return (
+                <div key={s.label} className={'session-row' + (done ? ' done' : '')}
+                  onClick={() => { setSelectedSession(s); setSessionDrillIdx(0); setView('session') }}>
+                  <div className="srow-left">
+                    <span className="srow-check">{done ? '✅' : '⬜'}</span>
+                    <div>
+                      <div className="srow-title">{s.label}: {s.focus}</div>
+                      <div className="srow-sub">{s.drillIds.map(id => DRILLS.find(d=>d.id===id)?.icon).join(' ')} · {s.duration} min</div>
+                    </div>
+                  </div>
+                  <span className="srow-arrow">›</span>
+                </div>
+              )
+            })}
+          </div>
+        ))}
+        <div style={{height:'80px'}} />
+      </div>
+    )
+  }
+
+  // ── VIEW: SESSION ─────────────────────────────────────────────────────────
+  if (view === 'session' && selectedSession) {
+    const s = selectedSession
+    const drillIds = s.drillIds
+    const currentId = drillIds[sessionDrillIdx]
+    const currentDrill = DRILLS.find(d => d.id === currentId)
+    const isLast = sessionDrillIdx === drillIds.length - 1
+
+    return (
+      <div className="app">
+        <header>
+          <button className="back-btn" onClick={() => { stopPar(); setView('program') }}>← Back</button>
+          <h2>{s.label}: {s.focus}</h2>
+          <p className="sub">Drill {sessionDrillIdx+1} of {drillIds.length}</p>
+        </header>
+
+        {currentDrill && (
+          <div className="drill-card">
+            <div className="drill-header">
+              <span className="drill-icon">{currentDrill.icon}</span>
+              <div>
+                <div className="drill-name">{currentDrill.name}</div>
+                <div className="drill-short">{currentDrill.short}</div>
+                <div className="drill-badge">{currentDrill.principles}</div>
+              </div>
+            </div>
+
+            <ParTimer drill={currentDrill} running={parRunning} elapsed={parElapsed}
+              repCount={parRepCount} onStart={() => startPar(currentDrill)} onStop={stopPar} />
+
+            <button className="btn-tips" onClick={() => { setSelectedDrill(currentDrill); setView('tips') }}>
+              📖 Tips & Technique
+            </button>
+          </div>
+        )}
+
+        <div className="session-nav">
+          {sessionDrillIdx > 0 && (
+            <button className="btn-secondary" onClick={() => { stopPar(); setSessionDrillIdx(i => i-1) }}>← Prev</button>
+          )}
+          {!isLast ? (
+            <button className="btn-primary" onClick={() => { stopPar(); setSessionDrillIdx(i => i+1) }}>Next →</button>
+          ) : (
+            <button className="btn-finish" onClick={() => { stopPar(); markSessionDone(s); setView('program') }}>
+              ✅ Complete Session
+            </button>
+          )}
         </div>
       </div>
     )
   }
 
-  return (
-    <div style={styles.screen}>
-      <div style={styles.header}>
-        <div style={styles.headerTitle}>CCW DRY-FIRE</div>
-        <div style={styles.streakBadge}>{streak} day streak</div>
-      </div>
-
-      <div style={styles.tabs}>
-        {['today', 'history', 'notes'].map(t => (
-          <button
-            key={t}
-            style={{...styles.tab, ...(tab === t ? styles.tabActive : {})}}
-            onClick={() => setTab(t)}
-          >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      <div style={styles.content}>
-        {tab === 'today' && (
+  // ── VIEW: DRILL LIBRARY ───────────────────────────────────────────────────
+  if (view === 'drill') return (
+    <div className="app">
+      <header>
+        <button className="back-btn" onClick={() => setView('home')}>← Back</button>
+        <h2>🔫 Drill Library</h2>
+      </header>
+      {DRILLS.map(d => (
+        <div key={d.id} className="drill-row" onClick={() => { setSelectedDrill(d); setView('tips') }}>
+          <span className="drill-icon-sm">{d.icon}</span>
           <div>
-            <div style={styles.progressBar}>
-              <div style={{...styles.progressFill, width: `${(completedToday / DRILLS.length) * 100}%`}} />
+            <div className="drill-row-name">{d.name}</div>
+            <div className="drill-row-sub">{d.short} · Par: {d.par}s · ×{d.reps}</div>
+          </div>
+          <span className="srow-arrow">›</span>
+        </div>
+      ))}
+      <div style={{height:'40px'}} />
+    </div>
+  )
+
+  // ── VIEW: TIPS ────────────────────────────────────────────────────────────
+  if (view === 'tips' && selectedDrill) {
+    const d = selectedDrill
+    return (
+      <div className="app">
+        <header>
+          <button className="back-btn" onClick={() => setView(selectedSession ? 'session' : 'drill')}>← Back</button>
+          <h2>{d.icon} {d.name}</h2>
+          <p className="sub">{d.principles}</p>
+        </header>
+        <div className="tips-card">
+          <div className="tip-meta">Par: <b>{d.par}s</b> · Reps: <b>{d.reps}</b></div>
+          {d.tips.map((tip, i) => (
+            <div key={i} className={'tip-item' + (expandedTip===i ? ' expanded' : '')}
+              onClick={() => setExpandedTip(expandedTip===i ? null : i)}>
+              <div className="tip-num">{i+1}</div>
+              <div className="tip-text">{tip}</div>
             </div>
-            <div style={styles.progressText}>{completedToday}/{DRILLS.length} drills complete</div>
+          ))}
+        </div>
+        <ParTimer drill={d} running={parRunning} elapsed={parElapsed}
+          repCount={parRepCount} onStart={() => startPar(d)} onStop={stopPar} />
+        <div style={{height:'60px'}} />
+      </div>
+    )
+  }
 
-            {DRILLS.map(drill => {
-              const done = !!todayData.drills?.[drill.id]
-              return (
-                <div key={drill.id} style={{...styles.drillCard, ...(done ? styles.drillDone : {})}}>
-                  <div style={styles.drillInfo}>
-                    <div style={styles.drillCardName}>{drill.name}</div>
-                    <div style={styles.drillCardDesc}>{drill.desc} • {drill.reps} reps</div>
-                  </div>
-                  {done ? (
-                    <div style={styles.checkmark}>✓</div>
-                  ) : (
-                    <button style={styles.startBtn} onClick={() => startDrill(drill)}>
-                      START
-                    </button>
-                  )}
-                </div>
-              )
-            })}
+  return null
+}
 
-            {todayData.completed && (
-              <div style={styles.completedBanner}>
-                🎯 Session Complete! Stay safe out there.
-              </div>
-            )}
-          </div>
-        )}
-
-        {tab === 'history' && (
-          <div>
-            <div style={styles.sectionTitle}>Last 14 Days</div>
-            {Array.from({length: 14}, (_, i) => {
-              const d = new Date()
-              d.setDate(d.getDate() - i)
-              const key = d.toISOString().slice(0, 10)
-              const day = data[key]
-              const done = day?.completed
-              const partial = day ? Object.keys(day.drills || {}).length : 0
-              return (
-                <div key={key} style={styles.historyRow}>
-                  <div style={styles.historyDate}>
-                    {i === 0 ? 'Today' : d.toLocaleDateString('en', {weekday:'short', month:'short', day:'numeric'})}
-                  </div>
-                  <div style={{...styles.historyStatus, color: done ? 'var(--green)' : partial > 0 ? 'var(--amber)' : 'var(--text-dim)'}}>
-                    {done ? 'Complete' : partial > 0 ? `${partial}/${DRILLS.length}` : 'Rest'}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {tab === 'notes' && (
-          <div>
-            <div style={styles.sectionTitle}>Session Notes</div>
-            <textarea
-              style={styles.notesInput}
-              value={notes || todayData.notes || ''}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="What did you work on? Any issues to address?"
-              rows={6}
-            />
-            <button style={styles.saveBtn} onClick={saveNotes}>Save Notes</button>
-            <div style={styles.sectionTitle}>Firearms Safety Rules</div>
-            {[
-              'TREAT every firearm as if it is loaded',
-              'NEVER point at anything you are not willing to destroy',
-              'KEEP finger off trigger until sights are on target',
-              'KNOW your target and what is beyond it'
-            ].map((rule, i) => (
-              <div key={i} style={styles.safetyRule}>{rule}</div>
-            ))}
-          </div>
-        )}
+// ─── PAR TIMER COMPONENT ─────────────────────────────────────────────────────
+function ParTimer({ drill, running, elapsed, repCount, onStart, onStop }) {
+  const pct = Math.min(100, (elapsed / drill.par) * 100)
+  return (
+    <div className="par-timer">
+      <div className="par-header">
+        <span>⏱ Par Timer — {drill.par}s × {drill.reps} reps</span>
+        {running && <span className="par-rep-count">Rep {repCount+1}/{drill.reps}</span>}
+      </div>
+      <div className="par-bar-bg">
+        <div className="par-bar-fill" style={{width: pct+'%',
+          background: pct > 85 ? '#ef4444' : pct > 60 ? '#f59e0b' : '#22c55e'}} />
+      </div>
+      <div className="par-time-row">
+        <span className="par-elapsed">{elapsed.toFixed(1)}s</span>
+        <span className="par-goal">{drill.par}s</span>
+      </div>
+      {repCount > 0 && !running && (
+        <div className="par-done">✅ {repCount} rep{repCount>1?'s':''} completed!</div>
+      )}
+      <div className="par-btns">
+        {!running
+          ? <button className="btn-par-start" onClick={onStart}>▶ Start Par Timer</button>
+          : <button className="btn-par-stop" onClick={onStop}>⏹ Stop</button>
+        }
       </div>
     </div>
   )
-}
-
-const styles = {
-  screen: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    background: 'var(--bg)',
-    color: 'var(--text)',
-    maxWidth: 480,
-    margin: '0 auto',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '16px 20px 8px',
-    paddingTop: 'max(16px, env(safe-area-inset-top))',
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 700,
-    letterSpacing: 2,
-    color: 'var(--amber)',
-  },
-  streakBadge: {
-    background: 'var(--amber-dim)',
-    color: 'var(--amber)',
-    padding: '4px 12px',
-    borderRadius: 20,
-    fontSize: 13,
-    fontWeight: 600,
-  },
-  tabs: {
-    display: 'flex',
-    padding: '0 20px',
-    gap: 8,
-    borderBottom: '1px solid #333',
-    paddingBottom: 8,
-  },
-  tab: {
-    flex: 1,
-    background: 'none',
-    border: 'none',
-    color: 'var(--text-dim)',
-    padding: '8px 0',
-    fontSize: 14,
-    cursor: 'pointer',
-    borderRadius: 8,
-  },
-  tabActive: {
-    color: 'var(--amber)',
-    background: 'rgba(245,158,11,0.1)',
-  },
-  content: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '16px 20px',
-    paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-  },
-  progressBar: {
-    height: 6,
-    background: 'var(--surface2)',
-    borderRadius: 3,
-    marginBottom: 8,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    background: 'var(--amber)',
-    borderRadius: 3,
-    transition: 'width 0.3s',
-  },
-  progressText: {
-    fontSize: 13,
-    color: 'var(--text-dim)',
-    marginBottom: 16,
-    textAlign: 'right',
-  },
-  drillCard: {
-    display: 'flex',
-    alignItems: 'center',
-    background: 'var(--surface)',
-    borderRadius: 'var(--radius)',
-    padding: '14px 16px',
-    marginBottom: 10,
-    gap: 12,
-  },
-  drillDone: {
-    opacity: 0.6,
-  },
-  drillInfo: { flex: 1 },
-  drillCardName: { fontSize: 16, fontWeight: 600, marginBottom: 2 },
-  drillCardDesc: { fontSize: 12, color: 'var(--text-dim)' },
-  startBtn: {
-    background: 'var(--amber)',
-    color: '#000',
-    border: 'none',
-    borderRadius: 8,
-    padding: '8px 16px',
-    fontWeight: 700,
-    fontSize: 12,
-    cursor: 'pointer',
-    letterSpacing: 1,
-  },
-  checkmark: {
-    color: 'var(--green)',
-    fontSize: 22,
-    fontWeight: 700,
-  },
-  completedBanner: {
-    background: 'rgba(34,197,94,0.1)',
-    border: '1px solid var(--green)',
-    color: 'var(--green)',
-    borderRadius: 'var(--radius)',
-    padding: '14px 16px',
-    textAlign: 'center',
-    fontSize: 15,
-    marginTop: 8,
-  },
-  drillActive: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    gap: 12,
-  },
-  drillName: { fontSize: 22, fontWeight: 700, color: 'var(--amber)', textAlign: 'center' },
-  drillDesc: { fontSize: 14, color: 'var(--text-dim)', textAlign: 'center', marginBottom: 16 },
-  repCount: { fontSize: 96, fontWeight: 700, lineHeight: 1, color: 'var(--text)' },
-  repLabel: { fontSize: 14, color: 'var(--text-dim)', marginBottom: 32 },
-  repBtn: {
-    width: '100%',
-    maxWidth: 300,
-    background: 'var(--amber)',
-    color: '#000',
-    border: 'none',
-    borderRadius: 'var(--radius)',
-    padding: '20px 0',
-    fontSize: 18,
-    fontWeight: 700,
-    cursor: 'pointer',
-    letterSpacing: 2,
-    marginBottom: 12,
-  },
-  cancelBtn: {
-    background: 'none',
-    border: '1px solid #444',
-    color: 'var(--text-dim)',
-    borderRadius: 'var(--radius)',
-    padding: '10px 24px',
-    fontSize: 14,
-    cursor: 'pointer',
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: 'var(--text-dim)',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  historyRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '10px 14px',
-    background: 'var(--surface)',
-    borderRadius: 8,
-    marginBottom: 6,
-  },
-  historyDate: { fontSize: 14 },
-  historyStatus: { fontSize: 13, fontWeight: 600 },
-  notesInput: {
-    width: '100%',
-    background: 'var(--surface)',
-    border: '1px solid #444',
-    borderRadius: 'var(--radius)',
-    color: 'var(--text)',
-    padding: 14,
-    fontSize: 14,
-    resize: 'vertical',
-    marginBottom: 12,
-    fontFamily: 'inherit',
-  },
-  saveBtn: {
-    background: 'var(--amber)',
-    color: '#000',
-    border: 'none',
-    borderRadius: 8,
-    padding: '10px 24px',
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: 'pointer',
-    marginBottom: 24,
-  },
-  safetyRule: {
-    background: 'var(--surface)',
-    borderLeft: '3px solid var(--amber)',
-    padding: '10px 14px',
-    marginBottom: 8,
-    borderRadius: '0 8px 8px 0',
-    fontSize: 13,
-    lineHeight: 1.4,
-  },
 }
