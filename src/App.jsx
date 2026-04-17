@@ -122,6 +122,7 @@ const PROGRAM = [
   { week:4, day:5, label:"W4D5", focus:"Graduation Day", duration:10, drillIds:["draw","sight","trigger","reload","malfunction","retention","scan"] },
 ]
 
+const REST_MS = 5000
 const STORAGE_KEY = "hollie-ccw-v2"
 function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") } catch(e) { return {} } }
 function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)) } catch(e) {} }
@@ -137,6 +138,8 @@ export default function App() {
     useState(false),
     useState(0),
     useState(0),
+    useState(false),
+    useState(0),
   ]
   var data = stateHooks[0][0], setData = stateHooks[0][1]
   var view = stateHooks[1][0], setView = stateHooks[1][1]
@@ -147,8 +150,11 @@ export default function App() {
   var parRunning = stateHooks[6][0], setParRunning = stateHooks[6][1]
   var parElapsed = stateHooks[7][0], setParElapsed = stateHooks[7][1]
   var parRepCount = stateHooks[8][0], setParRepCount = stateHooks[8][1]
+  var parResting = stateHooks[9][0], setParResting = stateHooks[9][1]
+  var restCountdown = stateHooks[10][0], setRestCountdown = stateHooks[10][1]
   var audioCtxRef = useRef(null)
   var parIntervalRef = useRef(null)
+  var restIntervalRef = useRef(null)
   var parRepRef = useRef(0)
   var parElapsedRef = useRef(0)
 
@@ -160,6 +166,23 @@ export default function App() {
     return audioCtxRef.current
   }
 
+  function doRest(onDone) {
+    var ctx = getAudioCtx()
+    stopBeep(ctx)
+    setParResting(true)
+    var remaining = REST_MS / 1000
+    setRestCountdown(remaining)
+    restIntervalRef.current = setInterval(function() {
+      remaining -= 1
+      setRestCountdown(remaining)
+      if (remaining <= 0) {
+        clearInterval(restIntervalRef.current)
+        setParResting(false)
+        onDone()
+      }
+    }, 1000)
+  }
+
   var startPar = useCallback(function(drill) {
     var ctx = getAudioCtx()
     var par = drill.par
@@ -169,23 +192,51 @@ export default function App() {
     setParRepCount(0)
     setParElapsed(0)
     setParRunning(true)
+    setParResting(false)
     startBeep(ctx)
+
+    function runRep() {
+      parElapsedRef.current = 0
+      setParElapsed(0)
+      parIntervalRef.current = setInterval(function() {
+        parElapsedRef.current += 0.1
+        setParElapsed(+(parElapsedRef.current.toFixed(1)))
+        if (parElapsedRef.current >= par) {
+          clearInterval(parIntervalRef.current)
+          parRepRef.current += 1
+          setParRepCount(parRepRef.current)
+          if (parRepRef.current >= reps) {
+            var ctx2 = getAudioCtx()
+            stopBeep(ctx2)
+            setParRunning(false)
+          } else {
+            doRest(function() {
+              var ctx3 = getAudioCtx()
+              startBeep(ctx3)
+              runRep()
+            })
+          }
+        }
+      }, 100)
+    }
+
     parIntervalRef.current = setInterval(function() {
       parElapsedRef.current += 0.1
       setParElapsed(+(parElapsedRef.current.toFixed(1)))
       if (parElapsedRef.current >= par) {
-        parElapsedRef.current = 0
-        setParElapsed(0)
-        var ctx2 = getAudioCtx()
+        clearInterval(parIntervalRef.current)
         parRepRef.current += 1
         setParRepCount(parRepRef.current)
         if (parRepRef.current >= reps) {
-          clearInterval(parIntervalRef.current)
+          var ctx2 = getAudioCtx()
+          stopBeep(ctx2)
           setParRunning(false)
-          stopBeep(ctx2)
         } else {
-          stopBeep(ctx2)
-          setTimeout(function() { var ctx3 = getAudioCtx(); startBeep(ctx3) }, 800)
+          doRest(function() {
+            var ctx3 = getAudioCtx()
+            startBeep(ctx3)
+            runRep()
+          })
         }
       }
     }, 100)
@@ -193,14 +244,22 @@ export default function App() {
 
   var stopPar = useCallback(function() {
     clearInterval(parIntervalRef.current)
+    clearInterval(restIntervalRef.current)
     setParRunning(false)
+    setParResting(false)
     setParElapsed(0)
     setParRepCount(0)
+    setRestCountdown(0)
     parRepRef.current = 0
     parElapsedRef.current = 0
   }, [])
 
-  useEffect(function() { return function() { clearInterval(parIntervalRef.current) } }, [])
+  useEffect(function() {
+    return function() {
+      clearInterval(parIntervalRef.current)
+      clearInterval(restIntervalRef.current)
+    }
+  }, [])
 
   function persist(next) { setData(next); saveData(next) }
   function sessionKey(s) { return s.label }
@@ -298,7 +357,8 @@ export default function App() {
               </div>
             </div>
             <ParTimer drill={currentDrill} running={parRunning} elapsed={parElapsed}
-              repCount={parRepCount} onStart={function() { startPar(currentDrill) }} onStop={stopPar} />
+              repCount={parRepCount} resting={parResting} restCountdown={restCountdown}
+              onStart={function() { startPar(currentDrill) }} onStop={stopPar} />
             <button className="btn-tips" onClick={function() { setSelectedDrill(currentDrill); setView("tips") }}>
               📖 Tips &amp; Technique
             </button>
@@ -350,7 +410,7 @@ export default function App() {
           <p className="sub">{d.principles}</p>
         </header>
         <div className="tips-card">
-          <div className="tip-meta">Par: <b>{d.par}s</b> &middot; Reps: <b>{d.reps}</b></div>
+          <div className="tip-meta">Par: <b>{d.par}s</b> &middot; Reps: <b>{d.reps}</b> &middot; Rest: <b>5s between</b></div>
           {d.tips.map(function(tip, i) { return (
             <div key={i} className={"tip-item" + (expandedTip===i ? " expanded" : "")}
               onClick={function() { setExpandedTip(expandedTip===i ? null : i) }}>
@@ -360,7 +420,8 @@ export default function App() {
           ) })}
         </div>
         <ParTimer drill={d} running={parRunning} elapsed={parElapsed}
-          repCount={parRepCount} onStart={function() { startPar(d) }} onStop={stopPar} />
+          repCount={parRepCount} resting={parResting} restCountdown={restCountdown}
+          onStart={function() { startPar(d) }} onStop={stopPar} />
         <div style={{height:"60px"}} />
       </div>
     )
@@ -371,27 +432,43 @@ export default function App() {
 
 function ParTimer(props) {
   var drill = props.drill, running = props.running, elapsed = props.elapsed
-  var repCount = props.repCount, onStart = props.onStart, onStop = props.onStop
+  var repCount = props.repCount, resting = props.resting, restCountdown = props.restCountdown
+  var onStart = props.onStart, onStop = props.onStop
   var pct = Math.min(100, (elapsed / drill.par) * 100)
   var barColor = pct > 85 ? "#ef4444" : pct > 60 ? "#f59e0b" : "#22c55e"
+  var restPct = resting ? Math.round(((5 - restCountdown) / 5) * 100) : 0
   return (
     <div className="par-timer">
       <div className="par-header">
         <span>&#9201; Par Timer &mdash; {drill.par}s x {drill.reps} reps</span>
-        {running && <span className="par-rep-count">Rep {repCount+1}/{drill.reps}</span>}
+        {(running || resting) && <span className="par-rep-count">Rep {repCount+1}/{drill.reps}</span>}
       </div>
-      <div className="par-bar-bg">
-        <div className="par-bar-fill" style={{width: pct + "%", background: barColor}} />
-      </div>
-      <div className="par-time-row">
-        <span className="par-elapsed">{elapsed.toFixed(1)}s</span>
-        <span className="par-goal">{drill.par}s</span>
-      </div>
-      {repCount > 0 && !running && (
+
+      {resting ? (
+        <div className="par-rest-box">
+          <div className="par-rest-label">&#8987; Reset &amp; reholster&hellip;</div>
+          <div className="par-bar-bg">
+            <div className="par-bar-fill" style={{width: restPct + "%", background: "#6366f1"}} />
+          </div>
+          <div className="par-rest-countdown">{restCountdown}s</div>
+        </div>
+      ) : (
+        <>
+          <div className="par-bar-bg">
+            <div className="par-bar-fill" style={{width: pct + "%", background: barColor}} />
+          </div>
+          <div className="par-time-row">
+            <span className="par-elapsed">{elapsed.toFixed(1)}s</span>
+            <span className="par-goal">{drill.par}s</span>
+          </div>
+        </>
+      )}
+
+      {repCount > 0 && !running && !resting && (
         <div className="par-done">✅ {repCount} rep{repCount > 1 ? "s" : ""} completed!</div>
       )}
       <div className="par-btns">
-        {!running
+        {!running && !resting
           ? <button className="btn-par-start" onClick={onStart}>&#9654; Start Par Timer</button>
           : <button className="btn-par-stop" onClick={onStop}>&#9632; Stop</button>
         }
