@@ -21,7 +21,7 @@ function stopBeep(ctx) {
 
 const DRILLS = [
   {
-    id: "draw", name: "Draw & Dry Fire", icon: "\uD83D\uDD2B", par: 1.5, reps: 5,
+    id: "draw", name: "Draw & Dry Fire", icon: "🔫", par: 1.5, reps: 5,
     short: "Full draw to first shot — 3 yards",
     principles: "TARGET FOCUS",
     steps: [
@@ -43,7 +43,7 @@ const DRILLS = [
     ],
   },
   {
-    id: "sight", name: "Sight Picture & Index", icon: "\uD83C\uDFAF", par: 2.0, reps: 10,
+    id: "sight", name: "Sight Picture & Index", icon: "🎯", par: 2.0, reps: 10,
     short: "Target-focus index drill — 5 yards",
     principles: "TARGET FOCUS",
     steps: [
@@ -64,7 +64,7 @@ const DRILLS = [
     ],
   },
   {
-    id: "trigger", name: "Trigger Control", icon: "\u2699\uFE0F", par: 3.0, reps: 15,
+    id: "trigger", name: "Trigger Control", icon: "⚙️", par: 3.0, reps: 15,
     short: "One decisive press per rep — 3 yards",
     principles: "TRIGGER RESET",
     steps: [
@@ -86,7 +86,7 @@ const DRILLS = [
     ],
   },
   {
-    id: "reload", name: "Emergency Reload", icon: "\uD83D\uDD04", par: 3.0, reps: 5,
+    id: "reload", name: "Emergency Reload", icon: "🔄", par: 3.0, reps: 5,
     short: "Drop mag, insert fresh, rack — 3 yards",
     principles: "ECONOMY OF MOTION",
     steps: [
@@ -108,7 +108,7 @@ const DRILLS = [
     ],
   },
   {
-    id: "malfunction", name: "Malfunction Clear", icon: "\u26A0\uFE0F", par: 4.0, reps: 5,
+    id: "malfunction", name: "Malfunction Clear", icon: "⚠️", par: 4.0, reps: 5,
     short: "Tap-rack-reassess — 3 yards",
     principles: "GROSS MOTOR",
     steps: [
@@ -118,7 +118,7 @@ const DRILLS = [
       "RACK: rotate the gun 90 degrees ejection-port up, reach over with your support hand, and rack the slide firmly rearward and release. This ejects the bad round and chambers a fresh one.",
       "REASSESS: drive the gun back to full extension, re-establish target focus, and press the trigger if the threat is still present.",
       "For Type 2 (stovepipe): swipe the ejection port with the edge of your support hand to clear the case, then rack.",
-      "For Type 3 (double-feed — advanced): rip the magazine out, rack twice to clear, reinsert fresh magazine, rack, reassess.",
+      "For Type 3 (double-feed): rip the magazine out, rack twice to clear, reinsert fresh magazine, rack, reassess.",
       "On the stop beep: safely lower the gun. Reholster during the rest period."
     ],
     tips: [
@@ -130,7 +130,7 @@ const DRILLS = [
     ],
   },
   {
-    id: "retention", name: "Retention Position", icon: "\uD83D\uDCAA", par: 2.0, reps: 8,
+    id: "retention", name: "Retention Position", icon: "💪", par: 2.0, reps: 8,
     short: "Close-quarters retention firing — 1 yard",
     principles: "BODY INDEX",
     steps: [
@@ -152,20 +152,20 @@ const DRILLS = [
     ],
   },
   {
-    id: "scan", name: "Scan & Assess", icon: "\uD83D\uDC40", par: 5.0, reps: 6,
+    id: "scan", name: "Scan & Assess", icon: "👀", par: 5.0, reps: 6,
     short: "Full sequence: draw, fire, scan, reholster — 5 yards",
     principles: "SITUATIONAL AWARENESS",
     steps: [
       "Stand at 5 yards, gun holstered. This drill trains the complete defensive shooting sequence from start to finish.",
       "On the start beep: establish target focus, then draw to full extension using your four-count draw (grip, clear, rotate, extend).",
-      "Press the trigger decisively until the striker falls (dry fire click). This simulates your first shot.",
+      "Press the trigger decisively until the striker falls (dry fire click). This simulates your first shot on the threat.",
       "Follow through: hold the trigger back, maintain target focus, confirm your front sight is level and on target.",
       "Scan LEFT: turn your head left and actively look for additional threats. Physically move your head — do not just glance.",
       "Scan RIGHT: turn your head right and actively look for additional threats. Look past 180 degrees if possible.",
-      "Assess: make a conscious decision that the threat is stopped and no other threats are present.",
-      "Safely decock or apply safety (if applicable). Lower the gun to a low-ready position.",
-      "Reholster slowly and deliberately, eyes up and still scanning. Never rush the holster.",
-      "On the stop beep: if you are still in the sequence, complete your scan and reholster safely."
+      "Assess: make a conscious decision that the threat is stopped and no other threats are present. Say out loud: clear.",
+      "Safely decock or apply safety (if applicable). Lower the gun to low-ready.",
+      "Reholster slowly and deliberately, eyes up and scanning. Never rush the holster.",
+      "On the stop beep: if still in sequence, complete your scan and reholster safely."
     ],
     tips: [
       "Joel Park: After every drill, build the habit. Scan left, scan right, look over your shoulder. Make it real. Move your head.",
@@ -206,32 +206,18 @@ function loadData() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) 
 function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)) } catch(e) {} }
 
 export default function App() {
-  var stateHooks = [
-    useState(loadData),
-    useState("home"),
-    useState(null),
-    useState(0),
-    useState(null),
-    useState(null),
-    useState(false),
-    useState(0),
-    useState(0),
-    useState(false),
-    useState(0),
-    useState(false),
-  ]
-  var data = stateHooks[0][0], setData = stateHooks[0][1]
-  var view = stateHooks[1][0], setView = stateHooks[1][1]
-  var selectedSession = stateHooks[2][0], setSelectedSession = stateHooks[2][1]
-  var sessionDrillIdx = stateHooks[3][0], setSessionDrillIdx = stateHooks[3][1]
-  var selectedDrill = stateHooks[4][0], setSelectedDrill = stateHooks[4][1]
-  var expandedTip = stateHooks[5][0], setExpandedTip = stateHooks[5][1]
-  var parRunning = stateHooks[6][0], setParRunning = stateHooks[6][1]
-  var parElapsed = stateHooks[7][0], setParElapsed = stateHooks[7][1]
-  var parRepCount = stateHooks[8][0], setParRepCount = stateHooks[8][1]
-  var parResting = stateHooks[9][0], setParResting = stateHooks[9][1]
-  var restCountdown = stateHooks[10][0], setRestCountdown = stateHooks[10][1]
-  var parWaiting = stateHooks[11][0], setParWaiting = stateHooks[11][1]
+  var s0 = useState(loadData), data = s0[0], setData = s0[1]
+  var s1 = useState("home"), view = s1[0], setView = s1[1]
+  var s2 = useState(null), selectedSession = s2[0], setSelectedSession = s2[1]
+  var s3 = useState(0), sessionDrillIdx = s3[0], setSessionDrillIdx = s3[1]
+  var s4 = useState(null), selectedDrill = s4[0], setSelectedDrill = s4[1]
+  var s5 = useState(null), expandedTip = s5[0], setExpandedTip = s5[1]
+  var s6 = useState(false), parRunning = s6[0], setParRunning = s6[1]
+  var s7 = useState(0), parElapsed = s7[0], setParElapsed = s7[1]
+  var s8 = useState(0), parRepCount = s8[0], setParRepCount = s8[1]
+  var s9 = useState(false), parResting = s9[0], setParResting = s9[1]
+  var s10 = useState(0), restCountdown = s10[0], setRestCountdown = s10[1]
+  var s11 = useState(false), parWaiting = s11[0], setParWaiting = s11[1]
 
   var audioCtxRef = useRef(null)
   var parIntervalRef = useRef(null)
@@ -342,7 +328,7 @@ export default function App() {
   if (view === "home") return (
     <div className="app">
       <header>
-        <h1>\uD83E\uDD20  Hotbabe Hollie&apos;s<br/>CCW Training App</h1>
+        <h1>🤠  Hotbabe Hollie&apos;s<br/>CCW Training App</h1>
         <p className="sub">Target-Focus &middot; 4 Weeks &middot; 10 Min/Day</p>
       </header>
       <div className="progress-card">
@@ -351,14 +337,14 @@ export default function App() {
           <div className="prog-bar-fill" style={{width: pct + "%"}}></div>
         </div>
         <p className="prog-msg">
-          {totalDone === 0 && "Ready to start? Let\u2019s go!"}
-          {totalDone > 0 && totalDone < PROGRAM.length && ("Next: " + nextSession.label + " \u2014 " + nextSession.focus)}
-          {totalDone === PROGRAM.length && "\uD83C\uDFC6 4-Week Program Complete!"}
+          {totalDone === 0 && "Ready to start? Let’s go!"}
+          {totalDone > 0 && totalDone < PROGRAM.length && ("Next: " + nextSession.label + " — " + nextSession.focus)}
+          {totalDone === PROGRAM.length && "🏆 4-Week Program Complete!"}
         </p>
       </div>
       <div className="btn-group">
-        <button className="btn-primary" onClick={function() { setView("program") }}>\uD83D\uDCC5 4-Week Program</button>
-        <button className="btn-secondary" onClick={function() { setView("drill") }}>\uD83D\uDD2B Drill Library</button>
+        <button className="btn-primary" onClick={function() { setView("program") }}>📅 4-Week Program</button>
+        <button className="btn-secondary" onClick={function() { setView("drill") }}>🔫 Drill Library</button>
       </div>
       {totalDone < PROGRAM.length && (
         <button className="btn-start-big" onClick={function() { setSelectedSession(nextSession); setSessionDrillIdx(0); setView("session") }}>
@@ -374,7 +360,7 @@ export default function App() {
       <div className="app">
         <header>
           <button className="back-btn" onClick={function() { setView("home") }}>&larr; Back</button>
-          <h2>\uD83D\uDCC5 4-Week Program</h2>
+          <h2>📅 4-Week Program</h2>
         </header>
         {weeks.map(function(w) { return (
           <div key={w} className="week-block">
@@ -385,7 +371,7 @@ export default function App() {
                 <div key={s.label} className={"session-row" + (done ? " done" : "")}
                   onClick={function() { setSelectedSession(s); setSessionDrillIdx(0); setView("session") }}>
                   <div className="srow-left">
-                    <span className="srow-check">{done ? "\u2705" : "\u2B1C"}</span>
+                    <span className="srow-check">{done ? "✅" : "⬜"}</span>
                     <div>
                       <div className="srow-label">{s.label}</div>
                       <div className="srow-focus">{s.focus}</div>
@@ -428,7 +414,7 @@ export default function App() {
               waiting={parWaiting}
               onStart={function() { startPar(currentDrill) }} onStop={stopPar} />
             <button className="btn-tips" onClick={function() { setSelectedDrill(currentDrill); setView("tips") }}>
-              \uD83D\uDCA1 Tips &amp; Technique
+              💡 Tips &amp; Technique
             </button>
           </div>
         )}
@@ -441,7 +427,7 @@ export default function App() {
           )}
           {isLast && (
             <button className="btn-done" onClick={function() { stopPar(); markSessionDone(selectedSession); setView("home") }}>
-              \u2705 Complete Session
+              ✅ Complete Session
             </button>
           )}
         </div>
@@ -453,7 +439,7 @@ export default function App() {
     <div className="app">
       <header>
         <button className="back-btn" onClick={function() { setView("home") }}>&larr; Back</button>
-        <h2>\uD83D\uDD2B Drill Library</h2>
+        <h2>🔫 Drill Library</h2>
       </header>
       {DRILLS.map(function(d) { return (
         <div key={d.id} className="drill-row" onClick={function() { setSelectedDrill(d); setView("tips") }}>
@@ -481,7 +467,7 @@ export default function App() {
         <div className="tips-card">
           <div className="tip-meta">Par: <b>{d.par}s</b> &middot; Reps: <b>{d.reps}</b> &middot; Rest: <b>5s between</b></div>
           <div className="steps-section">
-            <div className="steps-heading">\uD83D\uDCCB Step-by-Step Instructions</div>
+            <div className="steps-heading">📋 Step-by-Step Instructions</div>
             {d.steps.map(function(step, i) { return (
               <div key={i} className="step-item">
                 <div className="step-num">{i+1}</div>
@@ -489,7 +475,7 @@ export default function App() {
               </div>
             ) })}
           </div>
-          <div className="tips-heading">\uD83D\uDCA1 Tips &amp; Principles</div>
+          <div className="tips-heading">💡 Tips &amp; Principles</div>
           {d.tips.map(function(tip, i) { return (
             <div key={i} className={"tip-item" + (expandedTip===i ? " expanded" : "")}
               onClick={function() { setExpandedTip(expandedTip===i ? null : i) }}>
@@ -529,9 +515,9 @@ function ParTimer(props) {
         <div className="par-rest-box">
           <div className="par-rest-label">&#8987; Random delay&hellip; get ready!</div>
           <div className="par-bar-bg">
-            <div className="par-bar-fill" style={{width: "50%", background: "#6366f1", animation: "pulse 0.6s ease-in-out infinite alternate"}} />
+            <div className="par-bar-fill par-bar-pulse" style={{width: "60%", background: "#6366f1"}} />
           </div>
-          <div className="par-rest-countdown">&#x2022;</div>
+          <div className="par-rest-countdown">&#8226;</div>
         </div>
       ) : resting ? (
         <div className="par-rest-box">
@@ -565,4 +551,3 @@ function ParTimer(props) {
     </div>
   )
 }
-
